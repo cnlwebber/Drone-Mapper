@@ -1,6 +1,3 @@
-# Drone-Mapper
+# Project Title
 
-
-
-csvconvert works for the formatted csv files that he gave me, I changed it into a class so that I can create a little front end thing.
-one issue possibly is with csv files like 50k lines long, google earth gets really laggy.
+A simple CSV to KML converter that takes in a csv with columns Lat,Long,Alt and converts them into placemarks in KML format for viewing in Google Earth.
