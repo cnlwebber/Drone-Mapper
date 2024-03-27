@@ -1,21 +1,5 @@
 import pandas as pd
-
-
-# creates a KML formatted gx:track with the given coordinate
-def track(data):
-    # uses f-string to insert data into string
-    # PASTE THE FORMATTING FOR THE GX:TRACK HERE
-    return f"""
-<Folder>
-  <Placemark>
-    <gx:Track>
-        <altitudeMode>relativeToGround</altitudeMode>
-        {data}
-    </gx:Track>
-  </Placemark>
-</Folder>
-</kml>
-    """
+import re
 
 
 class TrackConverter:
@@ -26,7 +10,7 @@ class TrackConverter:
         self.stringlist = []
 
     # converts csv file
-    def convert(self, outputfile):
+    def convert(self, outputfile, header, t_format):
         # create DataFrame out of csv file with columns: Lat, Long, Alt
         df = pd.read_csv(self.csvfile)
 
@@ -36,26 +20,43 @@ class TrackConverter:
         # create/open new KML file to write to.
         with open(outputfile, 'w') as kml_file:
 
-
-            # PASTE HEADER HERE
-            # PASTE HEADER HERE
-            kml_file.write("""
-        """)
-            # PASTE HEADER HERE
-            # PASTE HEADER HERE
+            kml_file.write(header + "\n<!-- Beginning of Track -->\n")
 
             # iterate through time column, adding when values to string list
             for when in df['Time']:
-                self.stringlist.append("        <when>" + when + "</when>")
+                self.stringlist.append("<when>" + when + "</when>")
 
             # iterate through coordinates column, adding coords to string list
             for coords in df['coordinates']:
-                self.stringlist.append("        <gx:coord>" + coords + "</gx:coord>")
+                self.stringlist.append("<gx:coord>" + coords + "</gx:coord>")
 
             # write to kml file the formatted gx:track by joining string list into single string
-            kml_file.write(track('\n'.join(self.stringlist).strip()))
+            kml_file.write(track('\n'.join(self.stringlist).strip(), t_format))
 
             # write KML footer
-            kml_file.write('</Document>\n</kml>\n')
+            kml_file.write('\n    </Document>\n</kml>\n')
 
         return kml_file
+
+
+def track(the_data, the_t_format):
+    # search for </gx:Track>, split the string there, count the whitespace, then insert the data before
+    # with the correct leading whitespace
+    line_split = re.search(r"(\s*)(<gx:Track>.*)", the_t_format)
+    whitespace = len(line_split.group(1))
+    lines = the_data.splitlines()
+    modified_lines = [(whitespace + 6) * " " + line for line in lines]
+    modified_string = "\n".join(modified_lines)
+    str_list = re.split(r"(</gx:Track>.*)", the_t_format, 1)
+    str_list[0] = str_list[0].rstrip()
+    str_list[1] = whitespace * " " + "  " + str_list[1]
+    str_list.insert(1, "\n{element}\n")
+    return ''.join(str_list).format(element=modified_string)
+
+
+# For Matt's requirements:
+#
+# Take the gx:Track created in this script, then add it to a multitrack.
+# The multitrack will contain separate "gx:Tracks" that are actually just single place marks
+# In theory, the multitrack should be able to show the perfect gx:Track line, and the place marks of a second data set
+#

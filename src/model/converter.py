@@ -8,7 +8,7 @@ def placemark(coordinate):
         <Placemark>
             <styleUrl>#m_red-dot</styleUrl>
                 <Point>
-                    <altitudeMode>relativeToGround</altitudeMode>
+                    <altitudeMode>absolute</altitudeMode>
                     <coordinates>{coordinate}</coordinates>
                 </Point>
         </Placemark>
@@ -45,7 +45,7 @@ class Converter:
         <Style id="s_red-dot">
             <IconStyle>
                 <color>ff0000ff</color>
-                <scale>1.8</scale>
+                <scale>0.6</scale>
                     <Icon>
                         <href>http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png</href>
                     </Icon>
